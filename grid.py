@@ -25,11 +25,11 @@ def find_grid_borders(points):
 
   for point in points[1:]:
     max_x = max(max_x, point[0])
-    min_x = min(min_x, point[1])
-    max_y = max(max_y, point[0])
+    min_x = min(min_x, point[0])
+    max_y = max(max_y, point[1])
     min_y = min(min_y, point[1])
 
-  return (min_x, max_x, min_y, max_y)
+  return { 'min_x': min_x, 'max_x': max_x, 'min_y': min_y, 'max_y': max_y }
 
 def generate_grid_points(ranges, grid_density, grid_borders):
   (min_x, max_x, min_y, max_y) = (grid_borders['min_x'], grid_borders['max_x'], 
@@ -50,9 +50,25 @@ def generate_grid_points(ranges, grid_density, grid_borders):
         points.append([current_x, current_y])
         
   return points
-'''
-a = 10
-dict1 = {'min_x': 0.0, 'max_x': 20.0, 'min_y': 0.0, 'max_y': 10.0}
 
-generate_grid_points(None, a, dict1)
+def split_points(points, elements):
+  pass
+
+'''
+#przykład
+import math
+a = 0.785398163397
+r = 5
+points = [[math.cos(i*a) * r, math.sin(i*a) * r] for i in range(8)]
+elements = [[7,0,1],
+            [3,4,5],
+            [5,6,7],
+            [1,2,3]]
+
+ranges = generate_ranges(points, elements)
+borders = find_grid_borders(points)
+grid_points = generate_grid_points(ranges,10,borders)
+
+for point in grid_points:
+  print("r: {0}".format(math.sqrt(point[0]**2 + point[1]**2)))
 '''

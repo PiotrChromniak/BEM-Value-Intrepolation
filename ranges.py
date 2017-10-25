@@ -54,25 +54,13 @@ class OrthogonalRange(FunctionRange):
     ans = np.linalg.solve(mat, b)
     FunctionRange.__init__(self, ans)
 
-    symm_x = -self.B/(2*self.A)
-    if x1 > symm_x:
-      self.upper_start = x2
-      self.lower_start = x2
-      if y1 > y3:
-        self.upper_end = x1
-        self.lower_end = x3
-      else:
-        self.upper_end = x3
-        self.lower_end = x1  
-    else:
-      self.upper_end = x2
-      self.lower_end = x2
-      if y1 > y3:
-        self.upper_start = x1
-        self.lower_start = x3
-      else:
-        self.upper_start = x3
-        self.lower_start = x1
+    symm_x = (4*self.A*self.C -self.B**2)/(4*self.A)
+    upper_x = x1 if y1>y3 else x3
+    lower_x = x3 if y1>y3 else x1
+    self.upper_end = max(symm_x, upper_x)
+    self.upper_start = min(symm_x, upper_x)
+    self.lower_end = max(symm_x, lower_x)
+    self.lower_start = min(symm_x, lower_x)
 
   def is_in_range(self, x):
     in_upper_range = x >= self.upper_start and x <= self.upper_end
