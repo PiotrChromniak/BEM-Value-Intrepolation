@@ -87,7 +87,7 @@ class OrthogonalRange(FunctionRange):
         return intersection_counter
 
 
-
+'''
 a = OrthogonalRange([[2,3], [3,2], [1,1]])
 ans1 = a.get_intersections_count(1.5, 0.5)
 ans2 = a.get_intersections_count(1.5, 2)
@@ -106,4 +106,4 @@ b1 = b.is_in_range(-2)
 b2 = b.is_in_range(0.5)
 b3 = b.is_in_range(2)
 print("a")
-
+'''
