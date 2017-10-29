@@ -1,6 +1,6 @@
 import ranges as rg
 from math import sqrt
-
+import numpy as np
 
 def generate_ranges(points, elements):
     ranges = []
@@ -9,13 +9,21 @@ def generate_ranges(points, elements):
                         points[element[1]],
                         points[element[2]])
 
-        on_the_same_side = (p1[0] > p2[0] and p3[0] > p2[0]) or (
-            p1[0] < p2[0] and p3[0] < p2[0])
+        (v1, v2) = (np.subtract(p1, p2), np.subtract(p3, p2))
+        are_colinear = math.isclose(np.cross(v1, v2), 0)
 
-        if on_the_same_side:
-            ranges.append(rg.OrthogonalRange([p1, p2, p3]))
+        if are_colinear:
+            is_vertical_line = math.isclose(np.cross([0, 1], np.subtract(p3, p1)), 0)
+            if not is_vertical_line:
+                ranges.append(rg.LinearRange([p1, p2, p3]))
         else:
-            ranges.append(rg.StandardRange([p1, p2, p3]))
+            on_the_same_side = (p1[0] > p2[0] and p3[0] > p2[0]) or (
+                p1[0] < p2[0] and p3[0] < p2[0])
+
+            if on_the_same_side:
+                ranges.append(rg.OrthogonalRange([p1, p2, p3]))
+            else:
+                ranges.append(rg.StandardRange([p1, p2, p3]))
 
     return ranges
 
@@ -54,7 +62,7 @@ def generate_grid_points(ranges, grid_density, grid_borders):
   return points
 
 import math
-
+'''
 r = 5
 r2 = 2
 a = 0.78539816339744830961566084581988
@@ -69,10 +77,19 @@ elements = [[7, 0, 1],
             [9,10,11],
             [11,12,13],
             [13,14,15]]
+'''
+points = [[0,0], [1,0], [2,0], [3,0], [4,0], 
+		  [4,1], [4,2], [4,3], [4,4], 
+		  [3,4], [2,4], [1,4], [0,4],   
+		  [0,3], [0,2], [0,1]]
 
+elements = [[0,1,2], [2,3,4], [4,5,6], [6,7,8], [8,9,10], [10,11,12], [12,13,14], [14,15,0]]
 ranges = generate_ranges(points, elements)
 borders = find_grid_borders(points)
 
 grid_points = generate_grid_points(ranges, 10, borders)
 for point in grid_points:
-  print("r: {:.2}".format(sqrt(point[0]**2 + point[1]**2)))
+	print('point [x:{:.2}, y:{:.2}]'.format(point[0], point[1]))
+
+
+#print("r: {:.2}".format(sqrt(point[0]**2 + point[1]**2)))

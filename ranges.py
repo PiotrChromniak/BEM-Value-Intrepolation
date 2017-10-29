@@ -103,12 +103,12 @@ class LinearRange(FunctionRange):
     def _f(self, x):
         lhs = (x - self.p1[0])/(self.p2[0] - self.p1[0])
         rhs = self.p2[1] - self.p1[1]
-        fn_value = self.p1[1] + lhs / rhs
+        fn_value = self.p1[1] + lhs * rhs
         return fn_value
 
     def get_intersections_count(self, x, limit):
         value = self._f(x)
-        return 1 if limit <= value else 1
+        return 1 if limit <= value else 0
         
 
 '''
