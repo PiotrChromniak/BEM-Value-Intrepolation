@@ -35,14 +35,10 @@ class StandardRange(FunctionRange):
 
     def is_in_range(self, x):
         return x >= self.start and x <= self.end
-
+    
     def get_intersections_count(self, x, limit):
-        y = self._f(x)
-        if y < limit:
-            return 0
-        else:
-            return 1
-
+       y = self._f(x)
+       return 0 if y < limit else 1
 
 class OrthogonalRange(FunctionRange):
     def __init__(self, points):
@@ -57,16 +53,19 @@ class OrthogonalRange(FunctionRange):
         FunctionRange.__init__(self, ans)
 
         symm_x = (4 * self.A * self.C - self.B**2) / (4 * self.A)
-        upper_x = x1 if y1 > y3 else x3
-        lower_x = x3 if y1 > y3 else x1
+        (upper_x, lower_x) = (x1, x3) if y1 > y3 else (x3, x1)
+        #upper_x = x1 if y1 > y3 else x3
+        #lower_x = x3 if y1 > y3 else x1
         self.upper_end = max(symm_x, upper_x)
         self.upper_start = min(symm_x, upper_x)
         self.lower_end = max(symm_x, lower_x)
         self.lower_start = min(symm_x, lower_x)
 
     def is_in_range(self, x):
-        in_upper_range = x >= self.upper_start and x <= self.upper_end
-        in_lower_range = x >= self.lower_start and x <= self.lower_end
+        in_upper_range = self.upper_end >= x >= self.upper_start
+        #in_upper_range = x >= self.upper_start and x <= self.upper_end
+        #in_lower_range = x >= self.lower_start and x <= self.lower_end
+        in_lower_range = self.lower_end >= x >= self.lower_start 
         return in_lower_range or in_upper_range
 
     def get_intersections_count(self, x, limit):
@@ -86,6 +85,31 @@ class OrthogonalRange(FunctionRange):
 
         return intersection_counter
 
+class LinearRange(FunctionRange):
+    def __init__(self, points):
+        (x1, y1, x3, y3) = (points[0][0], points[0][1],
+                            points[2][0], points[2][1])
+
+        if x1 < x3:
+            self.p1 = points[0]
+            self.p2 = points[2]
+        else:
+            self.p1 = points[2]
+            self.p2 = points[0]
+
+    def is_in_range(self, x):
+        return self.p1[0] <= x <= self.p2[0]
+
+    def _f(self, x):
+        lhs = (x - self.p1[0])/(self.p2[0] - self.p1[0])
+        rhs = self.p2[1] - self.p1[1]
+        fn_value = self.p1[1] + lhs / rhs
+        return fn_value
+
+    def get_intersections_count(self, x, limit):
+        value = self._f(x)
+        return 1 if limit <= value else 1
+        
 
 '''
 a = OrthogonalRange([[2,3], [3,2], [1,1]])
