@@ -20,9 +20,9 @@ class StandardRange(FunctionRange):
         (x1, y1, x2, y2, x3, y3) = (points[0][0], points[0][1],
                                     points[1][0], points[1][1],
                                     points[2][0], points[2][1])
-        mat = np.array([[x1**2, x1, 1],
-                        [x2**2, x2, 1],
-                        [x3**2, x3, 1]])
+        mat = np.array([[x1 ** 2, x1, 1],
+                        [x2 ** 2, x2, 1],
+                        [x3 ** 2, x3, 1]])
         b = np.array([y1, y2, y3])
         ans = np.linalg.solve(mat, b)
         FunctionRange.__init__(self, ans)
@@ -45,17 +45,15 @@ class OrthogonalRange(FunctionRange):
         (x1, y1, x2, y2, x3, y3) = (points[0][0], points[0][1],
                                     points[1][0], points[1][1],
                                     points[2][0], points[2][1])
-        mat = np.array([[y1**2, y1, 1],
-                        [y2**2, y2, 1],
-                        [y3**2, y3, 1]])
+        mat = np.array([[y1 ** 2, y1, 1],
+                        [y2 ** 2, y2, 1],
+                        [y3 ** 2, y3, 1]])
         b = np.array([x1, x2, x3])
         ans = np.linalg.solve(mat, b)
         FunctionRange.__init__(self, ans)
 
-        symm_x = (4 * self.A * self.C - self.B**2) / (4 * self.A)
+        symm_x = (4 * self.A * self.C - self.B ** 2) / (4 * self.A)
         (upper_x, lower_x) = (x1, x3) if y1 > y3 else (x3, x1)
-        #upper_x = x1 if y1 > y3 else x3
-        #lower_x = x3 if y1 > y3 else x1
         self.upper_end = max(symm_x, upper_x)
         self.upper_start = min(symm_x, upper_x)
         self.lower_end = max(symm_x, lower_x)
@@ -63,15 +61,12 @@ class OrthogonalRange(FunctionRange):
 
     def is_in_range(self, x):
         in_upper_range = self.upper_end >= x >= self.upper_start
-        #in_upper_range = x >= self.upper_start and x <= self.upper_end
-        #in_lower_range = x >= self.lower_start and x <= self.lower_end
         in_lower_range = self.lower_end >= x >= self.lower_start 
         return in_lower_range or in_upper_range
 
     def get_intersections_count(self, x, limit):
-        sqrt_delta = math.sqrt(self.B**2 - 4 * self.A * (self.C - x))
-        (solution1, solution2) = ((-self.B - sqrt_delta) /
-                                  (2 * self.A), (-self.B + sqrt_delta) / (2 * self.A))
+        sqrt_delta = math.sqrt(self.B ** 2 - 4 * self.A * (self.C - x))
+        (solution1, solution2) = ((-self.B - sqrt_delta) / (2 * self.A), (-self.B + sqrt_delta) / (2 * self.A))
         y1 = min(solution1, solution2)
         y2 = max(solution1, solution2)
 
@@ -101,7 +96,7 @@ class LinearRange(FunctionRange):
         return self.p1[0] <= x <= self.p2[0]
 
     def _f(self, x):
-        lhs = (x - self.p1[0])/(self.p2[0] - self.p1[0])
+        lhs = (x - self.p1[0]) / (self.p2[0] - self.p1[0])
         rhs = self.p2[1] - self.p1[1]
         fn_value = self.p1[1] + lhs * rhs
         return fn_value
