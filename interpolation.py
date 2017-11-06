@@ -13,14 +13,19 @@ def interpolate2(results, grid_density, p=2):
     return { 'points': generated_points, 'values': interpolated_vals }     
 
 def interpolate_values2(new_points, data, grid_dx, p):
-    basic_values = [data['Sxx'], data['Syy'], data['Sxy'], data['UX'], data['UY']]
-    internal_values = [data['inSxx'], data['inSyy'], data['inSxy'], data['inUX'], data['inUY']] if data['internal_points'] else None
+    basic_values = [
+                    data['Sxx'], data['Syy'], data['Sxy'],
+                    data['UX'], data['UY']
+                    ]
+    internal_values = [
+                        data['inSxx'], data['inSyy'], data['inSxy'],
+                        data['inUX'], data['inUY']
+                      ] if data['internal_points'] else None
     points = data['points']
     internal_points = data['internal_points'] if internal_values else None
 
     results = [[], [], [], [], []]
-    for i in range(len(new_points)):
-        x = new_points[i]
+    for x in new_points:
         weights = [ calculate_weight(x, xi, p) for xi in points ]
         indices = None
         internal_weights = None
@@ -53,7 +58,8 @@ def calculate_weight(x, xi, p):
 def get_point_indices_in_proximity(point, internal_points, grid_dx):
     indices = []
     for i in range(len(internal_points)):
-        if abs(point[0] - internal_points[i][0]) <= grid_dx and abs(point[1] - internal_points[i][1]) <= grid_dx:
+        if (abs(point[0] - internal_points[i][0]) <= grid_dx 
+            and abs(point[1] - internal_points[i][1]) <= grid_dx):
         #if hypot(point[0] - internal_points[i][0], point[1] - internal_points[i][1]) <= 0.4:
             indices.append(i)
     

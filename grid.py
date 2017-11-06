@@ -17,7 +17,8 @@ def generate_ranges(points, elements):
             if not is_vertical_line:
                 ranges.append(rg.LinearRange([p1, p2, p3]))
         else:
-            on_the_same_side = (p1[0] > p2[0] and p3[0] > p2[0]) or (p1[0] < p2[0] and p3[0] < p2[0])
+            on_the_same_side = ((p1[0] > p2[0] and p3[0] > p2[0]) 
+                                or (p1[0] < p2[0] and p3[0] < p2[0]))
 
             if on_the_same_side:
                 ranges.append(rg.OrthogonalRange([p1, p2, p3]))
@@ -48,6 +49,18 @@ def generate_grid_points(ranges, grid_density, grid_borders):
   y_density = int((max_y - min_y) / dx)
 
   points = []
+  ax_x = np.linspace(min_x + dx/2, max_x - dx/2, num=grid_density)
+  ax_y = np.linspace(min_y + dx/2, max_y - dx/2, num=y_density)
+  x, y = np.meshgrid(ax_x, ax_y)
+
+  for xi, yi in zip(x.flat, y.flat):
+      valid_ranges = [f_range for f_range in ranges if f_range.is_in_range(xi)]
+      intersection_count = sum([f_range.get_intersections_count(xi, yi) 
+                                for f_range in valid_ranges])
+      if intersection_count % 2 is 1:
+          points.append([float(xi), float(yi)])
+  return points
+'''
   for i in range(grid_density):
     current_x = min_x + dx / 2 + i * dx
     for j in range(y_density):
@@ -57,5 +70,4 @@ def generate_grid_points(ranges, grid_density, grid_borders):
       intersection_count = sum([f_range.get_intersections_count(current_x, current_y) for f_range in valid_ranges])
       if intersection_count % 2 is 1:
         points.append([current_x, current_y])
-        
-  return points
+'''  

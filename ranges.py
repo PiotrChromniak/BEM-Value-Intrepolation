@@ -4,9 +4,7 @@ import math
 
 class FunctionRange(object):
     def __init__(self, ans):
-        self.A = float(ans[0])
-        self.B = float(ans[1])
-        self.C = float(ans[2])
+        (self.A, self.B, self.C) = (float(ans[0]), float(ans[1]), float(ans[2]))
 
     def is_in_range(self, x):
         raise NotImplementedError()
@@ -26,9 +24,7 @@ class StandardRange(FunctionRange):
         b = np.array([y1, y2, y3])
         ans = np.linalg.solve(mat, b)
         FunctionRange.__init__(self, ans)
-
-        self.start = min(x1, x3)
-        self.end = max(x1, x3)
+        (self.start, self.end) = (min(x1, x3), max(x1, x3))
 
     def _f(self, x):
         return ((self.A * x) + self.B) * x + self.C
@@ -66,7 +62,10 @@ class OrthogonalRange(FunctionRange):
 
     def get_intersections_count(self, x, limit):
         sqrt_delta = math.sqrt(self.B ** 2 - 4 * self.A * (self.C - x))
-        (solution1, solution2) = ((-self.B - sqrt_delta) / (2 * self.A), (-self.B + sqrt_delta) / (2 * self.A))
+        (solution1, solution2) = (
+                                    (-self.B - sqrt_delta) / (2 * self.A), 
+                                    (-self.B + sqrt_delta) / (2 * self.A)
+                                 )
         y1 = min(solution1, solution2)
         y2 = max(solution1, solution2)
 
@@ -86,11 +85,9 @@ class LinearRange(FunctionRange):
                             points[2][0], points[2][1])
 
         if x1 < x3:
-            self.p1 = points[0]
-            self.p2 = points[2]
+            (self.p1, self.p2) = (points[0], points[2])
         else:
-            self.p1 = points[2]
-            self.p2 = points[0]
+            (self.p1, self.p2) = (points[2], points[0])
 
     def is_in_range(self, x):
         return self.p1[0] <= x <= self.p2[0]
