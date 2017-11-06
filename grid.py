@@ -1,5 +1,5 @@
 import ranges as rg
-from math import sqrt
+from math import sqrt, isclose
 import numpy as np
 
 def generate_ranges(points, elements):
@@ -10,10 +10,10 @@ def generate_ranges(points, elements):
                         points[element[2]])
 
         (v1, v2) = (np.subtract(p1, p2), np.subtract(p3, p2))
-        are_colinear = math.isclose(np.cross(v1, v2), 0)
+        are_colinear = isclose(np.cross(v1, v2), 0)
 
         if are_colinear:
-            is_vertical_line = math.isclose(np.cross([0, 1], np.subtract(p3, p1)), 0)
+            is_vertical_line = isclose(np.cross([0, 1], np.subtract(p3, p1)), 0)
             if not is_vertical_line:
                 ranges.append(rg.LinearRange([p1, p2, p3]))
         else:
@@ -59,16 +59,3 @@ def generate_grid_points(ranges, grid_density, grid_borders):
         points.append([current_x, current_y])
         
   return points
-
-def split_internal_and_border_points(points_count, elements):
-    flat_elements = list(np.array(elements).flat)
-    border_points = []
-    internal_points = []
-
-    for point_id in range(points_count):
-        if point_id in flat_elements:
-            border_points.append(point_id)
-        else:
-            internal_points.append(point_id)
-            
-    return {'internal': internal_points, 'border': border_points}

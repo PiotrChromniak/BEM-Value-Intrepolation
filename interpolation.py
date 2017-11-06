@@ -1,4 +1,4 @@
-from math import hypot, isclose
+from math import (hypot, isclose)
 import numpy as np
 import grid
 
@@ -10,46 +10,7 @@ def interpolate2(results, grid_density, p=2):
     generated_points = grid.generate_grid_points(ranges, grid_density, borders)
     dx = (borders['max_x'] - borders['min_x']) / grid_density
     interpolated_vals = interpolate_values2(generated_points, results, dx, p)
-    return { 'points': generated_points, 'values': interpolated_vals }
-
-def interpolate(results, grid_density, p=2):
-    (points, UX, UY, Sxx, Syy, Sxy) = (results['points'], results['UX'], results['UY'],
-                                       results['Sxx'], results['Syy'], results['Sxy'])
-
-    (internal_points, inUX, inUY, inSxx, inSyy, inSxy) = (results['internal_points'], 
-                                                          results['inUX'], results['inUY'],
-                                                          results['inSxx'], results['inSyy'],
-                                                          results['inSxy'])
-                                
-    elements = results['elements']
-    ranges = grid.generate_ranges(points, elements)
-    borders = grid.find_grid_borders(points)
-    generated_points = grid.generate_grid_points(ranges, grid_density, borders)
-    dx = borders['max_x'] - borders['min_x']
-    result = interpolate_values(generated_points, points, internal_points, Sxx, inSxx, dx, p)
-
-    return { 'points': generated_points, 'values': result}
-
-def interpolate_values(new_points, points, internal_points, input_vals, internal_vals, grid_dx, p):
-    result_values = []
-    
-    for i in range(len(new_points)):
-        x = new_points[i]
-        weights = [ calculate_weight(x, xi, p) for xi in points ]
-        nominator = np.dot(weights, input_vals)
-        denominator = sum(weights)
-
-        if internal_points:
-            indices = filter_point_indices_in_proximity(x, internal_points, grid_dx)
-            for idx in indices:
-                weight = calculate_weight(x, internal_points[idx], p)
-                nominator += weight * internal_vals[idx]
-                denominator += weight
-
-        result_values.append(nominator/denominator)
-    
-    return result_values
-        
+    return { 'points': generated_points, 'values': interpolated_vals }     
 
 def interpolate_values2(new_points, data, grid_dx, p):
     basic_values = [data['Sxx'], data['Syy'], data['Sxy'], data['UX'], data['UY']]
@@ -88,12 +49,6 @@ def calculate_weight(x, xi, p):
         return 1
     weight = 1 / denominator
     return weight
-
-def filter_point_indices_in_proximity(point, internal_points, grid_dx):
-    for i in range(len(internal_points)):
-        if abs(point[0] - internal_points[i][0]) <= grid_dx and abs(point[1] - internal_points[i][1]) <= grid_dx:
-            yield i
-
 
 def get_point_indices_in_proximity(point, internal_points, grid_dx):
     indices = []
