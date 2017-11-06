@@ -99,6 +99,7 @@ def get_point_indices_in_proximity(point, internal_points, grid_dx):
     indices = []
     for i in range(len(internal_points)):
         if abs(point[0] - internal_points[i][0]) <= grid_dx and abs(point[1] - internal_points[i][1]) <= grid_dx:
+        #if hypot(point[0] - internal_points[i][0], point[1] - internal_points[i][1]) <= 0.4:
             indices.append(i)
     
     return indices

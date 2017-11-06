@@ -104,25 +104,3 @@ class LinearRange(FunctionRange):
     def get_intersections_count(self, x, limit):
         value = self._f(x)
         return 1 if limit <= value else 0
-        
-
-'''
-a = OrthogonalRange([[2,3], [3,2], [1,1]])
-ans1 = a.get_intersections_count(1.5, 0.5)
-ans2 = a.get_intersections_count(1.5, 2)
-ans3 = a.get_intersections_count(1.5, 3.5)
-
-a1 = a.is_in_range(0.5)
-a2 = a.is_in_range(1.5)
-a3 = a.is_in_range(2.5)
-a4 = a.is_in_range(4)
-
-b = StandardRange([[-1,1], [0,0], [1,1]])
-bans1 = b.get_intersections_count(0,1)
-bans2 = b.get_intersections_count(0,-1)
-
-b1 = b.is_in_range(-2)
-b2 = b.is_in_range(0.5)
-b3 = b.is_in_range(2)
-print("a")
-'''

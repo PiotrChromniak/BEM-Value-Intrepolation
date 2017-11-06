@@ -72,38 +72,3 @@ def split_internal_and_border_points(points_count, elements):
             internal_points.append(point_id)
             
     return {'internal': internal_points, 'border': border_points}
-
-import math
-'''
-r = 5
-r2 = 2
-a = 0.78539816339744830961566084581988
-points1 = [[math.cos(i * a) * r, math.sin(i * a) * r] for i in range(8)]
-points2 = [[math.cos(i * a) * r2, math.sin(i * a) * r2] for i in range(8)]
-points = points1 + points2
-elements = [[7, 0, 1],
-            [3, 4, 5],
-            [5, 6, 7],
-            [1, 2, 3],
-            [15,8,9],
-            [9,10,11],
-            [11,12,13],
-            [13,14,15]]
-'''
-'''
-points = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
-          [4, 1], [4, 2], [4, 3], [4, 4],
-          [3, 4], [2, 4], [1, 4], [0, 4],
-          [0, 3], [0, 2], [0, 1]]
-
-elements = [[0,1,2], [2,3,4], [4,5,6], [6,7,8], [8,9,10], [10,11,12], [12,13,14], [14,15,0]]
-ranges = generate_ranges(points, elements)
-borders = find_grid_borders(points)
-
-grid_points = generate_grid_points(ranges, 10, borders)
-for point in grid_points:
-    print('point [x:{:.2}, y:{:.2}]'.format(point[0], point[1]))
-
-
-#print("r: {:.2}".format(sqrt(point[0]**2 + point[1]**2)))
-'''
