@@ -2,17 +2,17 @@ from math import (hypot, isclose)
 import numpy as np
 import grid
 
-def interpolate2(results, grid_density, p=2):
+def interpolate(results, grid_density, p=2):
     (points, elements) = (results['points'], results['elements'])
 
     ranges = grid.generate_ranges(points, elements)
     borders = grid.find_grid_borders(points)
     generated_points = grid.generate_grid_points(ranges, grid_density, borders)
     dx = (borders['max_x'] - borders['min_x']) / grid_density
-    interpolated_vals = interpolate_values2(generated_points, results, dx, p)
+    interpolated_vals = interpolate_values(generated_points, results, dx, p)
     return { 'points': generated_points, 'values': interpolated_vals }     
 
-def interpolate_values2(new_points, data, grid_dx, p):
+def interpolate_values(new_points, data, grid_dx, p):
     basic_values = [
                     data['Sxx'], data['Syy'], data['Sxy'],
                     data['UX'], data['UY']
@@ -34,15 +34,15 @@ def interpolate_values2(new_points, data, grid_dx, p):
             if indices:
                 print('for point {:.2} {:.2} there are {} internal point neighbours'.format(x[0], x[1], len(indices)))
             internal_weights = [calculate_weight(x, internal_points[idx], p) for idx in indices]
-
-        for j in range(len(basic_values)):
-            nominator = np.dot(weights, basic_values[j])
+        
+        for j, (basic_vals, result) in enumerate(zip(basic_values, results)):
+            nominator = np.dot(weights, basic_vals)
             denominator = sum(weights)
             if internal_points:
                 denominator += sum(internal_weights)
                 for idx, weight in zip(indices, internal_weights):
                     nominator += internal_values[j][idx] * weight
-            results[j].append(nominator/denominator)
+            result.append(nominator/denominator)
 
     return { 'Sxx': results[0], 'Syy': results[1], 
              'Sxy': results[2], 'UX': results[3], 
