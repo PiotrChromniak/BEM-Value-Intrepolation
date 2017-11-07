@@ -60,14 +60,3 @@ def generate_grid_points(ranges, grid_density, grid_borders):
       if intersection_count % 2 is 1:
           points.append([float(xi), float(yi)])
   return points
-'''
-  for i in range(grid_density):
-    current_x = min_x + dx / 2 + i * dx
-    for j in range(y_density):
-      current_y = min_y + dx / 2 + j * dx
-      
-      valid_ranges = [f_range for f_range in ranges if f_range.is_in_range(current_x)]
-      intersection_count = sum([f_range.get_intersections_count(current_x, current_y) for f_range in valid_ranges])
-      if intersection_count % 2 is 1:
-        points.append([current_x, current_y])
-'''  
