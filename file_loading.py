@@ -1,9 +1,9 @@
 import re
 
 
-def load_data_from_file(filepath):
-    print('Opening file {}'.format(filepath))
-    with open(filepath, encoding = 'utf-8') as file:
+def load_data_from_file(file):
+    #print('Opening file {}'.format(filepath))
+    #with open(filepath, encoding = 'utf-8') as file:
         #read points
         print('Loading points...')
         next(file)

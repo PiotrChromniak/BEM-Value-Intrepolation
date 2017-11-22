@@ -31,8 +31,6 @@ def interpolate_values(new_points, data, grid_dx, p):
         internal_weights = None
         if internal_points:
             indices = get_point_indices_in_proximity(x, internal_points, grid_dx)
-            if indices:
-                print('for point {:.2} {:.2} there are {} internal point neighbours'.format(x[0], x[1], len(indices)))
             internal_weights = [calculate_weight(x, internal_points[idx], p) for idx in indices]
         
         for j, (basic_vals, result) in enumerate(zip(basic_values, results)):

@@ -2,22 +2,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 import file_loading
 import interpolation
+import argparse
+import os.path
+
+parser = argparse.ArgumentParser(description="Arguments for paser")
+parser.add_argument('-p', default=2, type=int, help='[uint] Factor for interpolation', metavar='COUNT')
+parser.add_argument('-grid', type=int, required=True, help='[uint] Grid density', metavar='COUNT')
+parser.add_argument('-file', type=argparse.FileType('r'), required=True, help='Input file', metavar='PATH')
+parser.add_argument('-plotdir', type=str, default='', help='Folder to hold output plots', metavar='DIRPATH')
+parser.add_argument('-out', type=str, help='Name of vtk output file')
+args = parser.parse_args()
+
+if args.plotdir and not os.path.isdir(args.plotdir):
+    print('plotdir doesn\'t exist or is not a directory')
+    exit()
 
 
-data = file_loading.load_data_from_file('C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/2.out')
-#ans = interpolation.interpolate(data, 10, p=3)
-ans2 = interpolation.interpolate2(data, 50, p=3)
+data = file_loading.load_data_from_file(args.file)#'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/1.out'
+ans2 = interpolation.interpolate(data, args.grid, args.p)
+
 ans = ans2['values']
+#for pt in ans2['points']:
+#    print('{} {}\n'.format(pt[0], pt[1]))
 
 x = np.array([ i[0] for i in data['points']] + [ i[0] for i in data['internal_points']] + [ i[0] for i in ans2['points']])
 y = np.array([ i[1] for i in data['points']] + [ i[1] for i in data['internal_points']] + [ i[1] for i in ans2['points']])
 z = np.array(data['Sxx'] + data['inSxx'] + ans['Sxx'])
 
 plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
-#plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
+#plt.tricontourf(x, y, z, 20, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
-path = 'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/wyniki/'
-plt.savefig(path + 'Sxx')
+path = args.plotdir#'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/wyniki/'
+plt.savefig(os.path.join(path,'Sxx'))
 
 
 cbar.remove()
@@ -25,25 +41,65 @@ z = np.array(data['Syy'] + data['inSyy'] + ans['Syy'])
 plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
 #plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
-plt.savefig(path + 'Syy')
+plt.savefig(os.path.join(path, 'Syy'))
 
 cbar.remove()
 z = np.array(data['Sxy'] + data['inSxy'] + ans['Sxy'])
 plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
 #plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
-plt.savefig(path + 'Sxy')
+plt.savefig(os.path.join(path, 'Sxy'))
 
 cbar.remove()
 z = np.array(data['UX'] + data['inUX'] + ans['UX'])
 plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
 #plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
-plt.savefig(path + 'UX')
+plt.savefig(os.path.join(path, 'UX'))
 
 cbar.remove()
 z = np.array(data['UY'] + data['inUY'] + ans['UY'])
 plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
 #plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
-plt.savefig(path + 'UY')
+plt.savefig(os.path.join(path, 'UY'))
+
+if args.out:
+    points = data['points']
+    points_count = len(points)
+    internal = data['internal_points']
+    internal_count = len(internal)
+    grid = ans2['points']
+    grid_count = len(grid)
+    elements = data['elements']
+    #x = np.array([ i[0] for i in data['points']] + [ i[0] for i in data['internal_points']] + [ i[0] for i in ans2['points']])
+    with open(args.out + '.vtk', 'w', encoding = 'utf-8') as file: #'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/file2.vtk'
+        file.write('# vtk DataFile Version 2.0\n')
+        file.write('test\n')
+        file.write('ASCII\n')
+        file.write('DATASET UNSTRUCTURED_GRID\n')
+        file.write('POINTS {} double\n'.format(points_count + internal_count+grid_count))
+        for pt in points:
+            file.write('{0} {1} 0.0\n'.format(pt[0], pt[1]))
+
+        for pt in internal:
+            file.write('{0} {1} 0.0\n'.format(pt[0], pt[1]))
+
+        for pt in grid:
+            file.write('{0} {1} 0.0\n'.format(pt[0], pt[1]))
+
+        file.write('CELLS {0} {1}\n'.format(len(elements), len(elements) * 4))
+        for el in elements:
+            file.write('3 {0} {1} {2}\n'.format(el[0], el[1], el[2]))
+
+        file.write('CELL_TYPES {}\n'.format(len(elements)))
+        for _ in range(len(elements)):
+            file.write('21\n')
+
+        file.write('POINT_DATA {0}\nTENSORS stresses double\n'.format(points_count + internal_count+grid_count))
+        Sxx = data['Sxx'] + data['inSxx'] + ans['Sxx']
+        Syy = data['Syy'] + data['inSyy'] + ans['Syy']
+        Sxy = data['Sxy'] + data['inSxy'] + ans['Sxy']
+        for xx, yy, xy in zip(Sxx, Syy, Sxy):
+            file.write('{0} {2} 0.0\n{2} {1} 0.0\n0.0 0.0 0.0\n'.format(xx, yy, xy))
+            file.write('\n')
