@@ -1,4 +1,5 @@
-from math import (hypot, isclose)
+from math import hypot, isclose
+from functools import partial
 import numpy as np
 import grid
 
@@ -26,12 +27,13 @@ def interpolate_values(new_points, data, grid_dx, p):
 
     results = [[], [], [], [], []]
     for x in new_points:
-        weights = [ calculate_weight(x, xi, p) for xi in points ]
+        weight_for_x = partial(calculate_weight, p, x)
+        weights = [ weight_for_x(xi) for xi in points ]#calculate_weight(p, x, xi)
         indices = None
         internal_weights = None
         if internal_points:
             indices = get_point_indices_in_proximity(x, internal_points, grid_dx)
-            internal_weights = [calculate_weight(x, internal_points[idx], p) for idx in indices]
+            internal_weights = [ weight_for_x(internal_points[idx]) for idx in indices ]#calculate_weight(p, x, internal_points[idx])
         
         for j, (basic_vals, result) in enumerate(zip(basic_values, results)):
             nominator = np.dot(weights, basic_vals)
@@ -46,7 +48,7 @@ def interpolate_values(new_points, data, grid_dx, p):
              'Sxy': results[2], 'UX': results[3], 
              'UY': results[4] }
 
-def calculate_weight(x, xi, p):
+def calculate_weight(p, x, xi):
     denominator = hypot(x[0]-xi[0], x[1]-xi[1]) ** p
     if isclose(denominator, 0):
         return 1
