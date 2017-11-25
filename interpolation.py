@@ -9,8 +9,12 @@ def interpolate(results, grid_density, p=2):
     ranges = grid.generate_ranges(points, elements)
     borders = grid.find_grid_borders(points)
     generated_points = grid.generate_grid_points(ranges, grid_density, borders)
+    print('Generated {} internal points'.format(len(generated_points)))
     dx = (borders['max_x'] - borders['min_x']) / grid_density
+    
+    print('Interpolating values...',end='')
     interpolated_vals = interpolate_values(generated_points, results, dx, p)
+    print('done')
     return { 'points': generated_points, 'values': interpolated_vals }     
 
 def interpolate_values(new_points, data, grid_dx, p):
@@ -28,12 +32,12 @@ def interpolate_values(new_points, data, grid_dx, p):
     results = [[], [], [], [], []]
     for x in new_points:
         weight_for_x = partial(calculate_weight, p, x)
-        weights = [ weight_for_x(xi) for xi in points ]#calculate_weight(p, x, xi)
+        weights = [ weight_for_x(xi) for xi in points ]
         indices = None
         internal_weights = None
         if internal_points:
             indices = get_point_indices_in_proximity(x, internal_points, grid_dx)
-            internal_weights = [ weight_for_x(internal_points[idx]) for idx in indices ]#calculate_weight(p, x, internal_points[idx])
+            internal_weights = [ weight_for_x(internal_points[idx]) for idx in indices ]
         
         for j, (basic_vals, result) in enumerate(zip(basic_values, results)):
             nominator = np.dot(weights, basic_vals)

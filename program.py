@@ -17,22 +17,20 @@ if args.plotdir and not os.path.isdir(args.plotdir):
     print('plotdir doesn\'t exist or is not a directory')
     exit()
 
-
-data = file_loading.load_data_from_file(args.file)#'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/1.out'
+data = file_loading.load_data_from_file(args.file)
 ans2 = interpolation.interpolate(data, args.grid, args.p)
 
 ans = ans2['values']
-#for pt in ans2['points']:
-#    print('{} {}\n'.format(pt[0], pt[1]))
 
 x = np.array([ i[0] for i in data['points']] + [ i[0] for i in data['internal_points']] + [ i[0] for i in ans2['points']])
 y = np.array([ i[1] for i in data['points']] + [ i[1] for i in data['internal_points']] + [ i[1] for i in ans2['points']])
 z = np.array(data['Sxx'] + data['inSxx'] + ans['Sxx'])
 
+print('Generating plots...',end='')
 plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
 #plt.tricontourf(x, y, z, 20, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
-path = args.plotdir#'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/wyniki/'
+path = args.plotdir
 plt.savefig(os.path.join(path,'Sxx'))
 
 
@@ -63,6 +61,7 @@ plt.tripcolor(x, y, z, cmap=plt.cm.hot_r, edgecolor='black')
 #plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
 cbar = plt.colorbar()
 plt.savefig(os.path.join(path, 'UY'))
+print('done')
 
 if args.out:
     points = data['points']
@@ -72,13 +71,17 @@ if args.out:
     grid = ans2['points']
     grid_count = len(grid)
     elements = data['elements']
-    #x = np.array([ i[0] for i in data['points']] + [ i[0] for i in data['internal_points']] + [ i[0] for i in ans2['points']])
-    with open(args.out + '.vtk', 'w', encoding = 'utf-8') as file: #'C:/Users/Viator/Documents/GitHub/BEM-Value-Intrepolation/file2.vtk'
+    Sxx = data['Sxx'] + data['inSxx'] + ans['Sxx']
+    Syy = data['Syy'] + data['inSyy'] + ans['Syy']
+    Sxy = data['Sxy'] + data['inSxy'] + ans['Sxy']
+
+    print('Writing vtk files..', end='')
+    with open(args.out + '.vtk', 'w', encoding = 'utf-8') as file:
         file.write('# vtk DataFile Version 2.0\n')
         file.write('test\n')
         file.write('ASCII\n')
         file.write('DATASET UNSTRUCTURED_GRID\n')
-        file.write('POINTS {} double\n'.format(points_count + internal_count+grid_count))
+        file.write('POINTS {} double\n'.format(points_count + internal_count + grid_count))
         for pt in points:
             file.write('{0} {1} 0.0\n'.format(pt[0], pt[1]))
 
@@ -96,10 +99,10 @@ if args.out:
         for _ in range(len(elements)):
             file.write('21\n')
 
-        file.write('POINT_DATA {0}\nTENSORS stresses double\n'.format(points_count + internal_count+grid_count))
-        Sxx = data['Sxx'] + data['inSxx'] + ans['Sxx']
-        Syy = data['Syy'] + data['inSyy'] + ans['Syy']
-        Sxy = data['Sxy'] + data['inSxy'] + ans['Sxy']
+        file.write('POINT_DATA {0}\nTENSORS stresses double\n'.format(points_count + internal_count + grid_count))
+
         for xx, yy, xy in zip(Sxx, Syy, Sxy):
             file.write('{0} {2} 0.0\n{2} {1} 0.0\n0.0 0.0 0.0\n'.format(xx, yy, xy))
             file.write('\n')
+    print('done')
+    
