@@ -81,6 +81,7 @@ if args.out:
     print('Writing vtk files..', end='')
     with open(args.out + '0' + '.vtk', 'w', encoding='utf-8') as file:
         file.write('# vtk DataFile Version 2.0\n')
+        file.write('Initial mesh\n')
         file.write('ASCII\n')
         file.write('DATASET UNSTRUCTURED_GRID\n')
         file.write('POINTS {} double\n'.format(
