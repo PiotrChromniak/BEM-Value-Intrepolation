@@ -10,26 +10,33 @@ def interpolate(results, grid_density, p=2):
     borders = grid.find_grid_borders(points)
     generated_points = grid.generate_grid_points(ranges, grid_density, borders)
     print('Generated {} internal points'.format(len(generated_points)))
-    dx = (borders['max_x'] - borders['min_x']) / grid_density
-    
+    #dx = (borders['max_x'] - borders['min_x']) / grid_density
+    xlen = borders['max_x'] - borders['min_x']
+    dx = xlen * 0.2
+    print('Radius {} x-length {}'.format(dx, xlen))
     print('Interpolating values...',end='')
+
     interpolated_vals = interpolate_values(generated_points, results, dx, p)
     print('done')
+    
     return { 'points': generated_points, 'values': interpolated_vals }     
 
 def interpolate_values(new_points, data, grid_dx, p):
     basic_values = [
                     data['Sxx'], data['Syy'], data['Sxy'],
-                    data['UX'], data['UY']
+                    data['UX'], data['UY'], 
+                    data['Szz'], data['SE'],
                     ]
     internal_values = [
                         data['inSxx'], data['inSyy'], data['inSxy'],
-                        data['inUX'], data['inUY']
+                        data['inUX'], data['inUY'], 
+                        data['inSzz'], data['inSE'],
                       ] if data['internal_points'] else None
     points = data['points']
     internal_points = data['internal_points'] if internal_values else None
 
-    results = [[], [], [], [], []]
+
+    results = [[], [], [], [], [], [], []]
     for x in new_points:
         weight_for_x = partial(calculate_weight, p, x)
         weights = [ weight_for_x(xi) for xi in points ]
@@ -50,7 +57,8 @@ def interpolate_values(new_points, data, grid_dx, p):
 
     return { 'Sxx': results[0], 'Syy': results[1], 
              'Sxy': results[2], 'UX': results[3], 
-             'UY': results[4] }
+             'UY': results[4], 'Szz': results[5],
+             'SE': results[6] }
 
 def calculate_weight(p, x, xi):
     denominator = hypot(x[0]-xi[0], x[1]-xi[1]) ** p
@@ -62,9 +70,7 @@ def calculate_weight(p, x, xi):
 def get_point_indices_in_proximity(point, internal_points, grid_dx):
     indices = []
     for i in range(len(internal_points)):
-        if (abs(point[0] - internal_points[i][0]) <= grid_dx 
-            and abs(point[1] - internal_points[i][1]) <= grid_dx):
-        #if hypot(point[0] - internal_points[i][0], point[1] - internal_points[i][1]) <= 0.4:
+        if hypot(point[0] - internal_points[i][0], point[1] - internal_points[i][1]) <= grid_dx:
             indices.append(i)
     
     return indices

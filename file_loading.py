@@ -58,13 +58,15 @@ def load_data_from_file(file):
 
     #read point stresses
     print('Loading stresses for points...')
-    Sxx = []; Syy = []; Sxy = []
+    Sxx = []; Syy = []; Sxy = []; Szz = []; SE = []
     for _ in range(len(points)):
         line = file.readline()
-        lines = line.split()[1:4]
+        lines = line.split()[1:]
         Sxx.append(float(lines[0]))
         Syy.append(float(lines[1]))
         Sxy.append(float(lines[2]))
+        Szz.append(float(lines[3]))
+        SE.append(float(lines[4]))
 
     #skip until internal point results
     while not re.search(r'Internal', file.read(10)):
@@ -84,23 +86,28 @@ def load_data_from_file(file):
     next(file)
 
     print('Loading stresses for internal points...')
-    inSxx = []; inSyy = []; inSxy = []
+    inSxx = []; inSyy = []; inSxy = []; inSzz = []; inSE = []
     for _ in range(len(internal_points)):
         line = file.readline()
         lines = line.split()[3:]
         inSxx.append(float(lines[0]))
         inSyy.append(float(lines[1]))
         inSxy.append(float(lines[2]))
+        inSzz.append(float(lines[3]))
+        inSE.append(float(lines[4]))
 
     print('\nLoaded:\n{} points'.format(len(points)))
     print('{} elements'.format(len(elements)))
     print('{} internal points'.format(len(internal_points)))
+    print('Boundry point values:')
     print('{0} UX\t{1} UY\t{2} Un\t{3} Us'.format(len(UX), len(UY), len(Un), len(Us)))
-    print('{0} Sxx\t{1} Syy\t{2} Sxy'.format(len(Sxx), len(Syy), len(Sxy)))
+    print('{0} Sxx\t{1} Syy\t{2} Sxy\t{3} Szz\t{4} SE'.format(len(Sxx), len(Syy), len(Sxy), len(Szz), len(SE)))
+    print('Internal point values:')
     print('{0} UX\t {1} UY'.format(len(inUX), len(inUY)))
-    print('{0} Sxx\t{1} Syy\t{2} Sxy'.format(len(inSxx), len(inSyy), len(inSxy)))
+    print('{0} Sxx\t{1} Syy\t{2} Sxy\t{3} Szz\t{4} SE'.format(len(inSxx), len(inSyy), len(inSxy), len(inSzz), len(inSzz)))
 
     return { 'points': points, 'internal_points': internal_points,
              'elements': elements, 'UX': UX, 'UY': UY, 'inUX': inUX,
              'inUY': inUY, 'Sxx': Sxx, 'Syy': Syy, 'Sxy': Sxy,
-             'inSxx': inSxx, 'inSyy': inSxy, 'inSxy': inSxy}
+             'inSxx': inSxx, 'inSyy': inSxy, 'inSxy': inSxy,
+             'SE': SE, 'inSE': inSE, 'Szz':Szz, 'inSzz':inSzz}

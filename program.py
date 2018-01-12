@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import file_loading
 import interpolation
@@ -22,6 +21,7 @@ if args.plotdir and not os.path.isdir(args.plotdir):
     exit()
 
 data = file_loading.load_data_from_file(args.file)
+
 ans2 = interpolation.interpolate(data, args.grid, args.p)
 
 ans = ans2['values']
@@ -31,44 +31,12 @@ x = np.array([i[0] for i in data['points']] + [i[0]
 y = np.array([i[1] for i in data['points']] + [i[1]
              for i in data['internal_points']] + [i[1] for i in ans2['points']])
 Sxx = np.array(data['Sxx'] + data['inSxx'] + ans['Sxx'])
-
-print('Generating plots...', end='')
-plt.tripcolor(x, y, Sxx, cmap=plt.cm.hot_r, edgecolor='black')
-# plt.tricontourf(x, y, z, 20, cmap=plt.cm.hot_r,edgecolor='black')
-cbar = plt.colorbar()
-path = args.plotdir
-plt.savefig(os.path.join(path, 'Sxx'))
-
-
-cbar.remove()
 Syy = np.array(data['Syy'] + data['inSyy'] + ans['Syy'])
-plt.tripcolor(x, y, Syy, cmap=plt.cm.hot_r, edgecolor='black')
-# plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
-cbar = plt.colorbar()
-plt.savefig(os.path.join(path, 'Syy'))
-
-cbar.remove()
 Sxy = np.array(data['Sxy'] + data['inSxy'] + ans['Sxy'])
-plt.tripcolor(x, y, Sxy, cmap=plt.cm.hot_r, edgecolor='black')
-# plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
-cbar = plt.colorbar()
-plt.savefig(os.path.join(path, 'Sxy'))
-
-cbar.remove()
+Szz = np.array(data['Szz'] + data['inSzz'] + ans['Szz'])
+SE = np.array(data['SE'] + data['inSE'] + ans['SE'])
 UX = np.array(data['UX'] + data['inUX'] + ans['UX'])
-plt.tripcolor(x, y, UX, cmap=plt.cm.hot_r, edgecolor='black')
-# plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
-cbar = plt.colorbar()
-plt.savefig(os.path.join(path, 'UX'))
-
-cbar.remove()
 UY = np.array(data['UY'] + data['inUY'] + ans['UY'])
-plt.tripcolor(x, y, UY, cmap=plt.cm.hot_r, edgecolor='black')
-# plt.tricontourf(x, y, z, 10, cmap=plt.cm.hot_r,edgecolor='black')
-cbar = plt.colorbar()
-plt.savefig(os.path.join(path, 'UY'))
-print('done')
-
 if args.out:
     points = data['points']
     points_count = len(points)
@@ -89,21 +57,36 @@ if args.out:
         for pt_x, pt_y in zip(x, y):
             file.write('{0} {1} 0.0\n'.format(pt_x, pt_y))
 
-        file.write('CELLS {0} {1}\n'.format(len(elements), len(elements) * 4))
+        file.write('CELLS {0} {1}\n'.format(len(elements) + grid_count + internal_count , len(elements) * 4 + (grid_count + internal_count) * 2))
         for el in elements:
             file.write('3 {0} {1} {2}\n'.format(el[0], el[1], el[2]))
+        for i in range(internal_count):
+            file.write('1 {}\n'.format(i + points_count))
+        for i in range(grid_count):
+            file.write('1 {}\n'.format(i + points_count + internal_count))
 
-        file.write('CELL_TYPES {}\n'.format(len(elements)))
+        file.write('CELL_TYPES {}\n'.format(len(elements) + grid_count + internal_count))
         for _ in range(len(elements)):
             file.write('21\n')
+        for _ in range(grid_count + internal_count):
+            file.write('1\n')
 
         file.write('POINT_DATA {0}\nTENSORS stresses double\n'.format(
             points_count + internal_count + grid_count))
 
-        for xx, yy, xy in zip(Sxx, Syy, Sxy):
+        for xx, yy, xy, zz in zip(Sxx, Syy, Sxy, Szz):
             file.write(
-                '{0} {2} 0.0\n{2} {1} 0.0\n0.0 0.0 0.0\n'.format(xx, yy, xy))
+                '{0} {2} 0.0\n{2} {1} 0.0\n0.0 0.0 {3}\n'.format(xx, yy, xy, zz))
             file.write('\n')
+        
+        file.write('VECTORS displacements double\n')
+        for ux, uy in zip(UX, UY):
+            file.write('{} {} 0.0\n'.format(ux, uy))
+
+        file.write('\nSCALARS Mises double\nLOOKUP_TABLE tableName\n')
+        for se in SE:
+            file.write('{}\n'.format(se))
+
     
     x = x + UX
     y = y + UY
@@ -126,9 +109,16 @@ if args.out:
 
         file.write('POINT_DATA {0}\nTENSORS stresses double\n'.format(points_count + internal_count + grid_count))
 
-        for xx, yy, xy in zip(Sxx, Syy, Sxy):
-            file.write('{0} {2} 0.0\n{2} {1} 0.0\n0.0 0.0 0.0\n'.format(xx, yy, xy))
+        for xx, yy, xy, zz in zip(Sxx, Syy, Sxy, Szz):
+            file.write('{0} {2} 0.0\n{2} {1} 0.0\n0.0 0.0 {3}\n'.format(xx, yy, xy, zz))
             file.write('\n')   
 
+        file.write('VECTORS displacements double\n')
+        for ux, uy in zip(UX, UY):
+            file.write('{} {} 0.0\n'.format(ux, uy))
+
+        file.write('\nSCALARS Mises double\nLOOKUP_TABLE tableName\n')
+        for se in SE:
+            file.write('{}\n'.format(se))
     print('done')
     
